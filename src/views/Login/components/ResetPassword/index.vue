@@ -2,7 +2,6 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { handleSDKErrorNotifi } from '@/utils/handleSomeData'
-import { createImageCode, fetchAuthCode } from '@/api/register'
 import { requestModifyPwd, updateNewPasswrod } from '@/api/resetPassword'
 /* emits */
 const emits = defineEmits(['changeToLogin'])
@@ -13,9 +12,6 @@ const resetPasswordFrom = reactive({
     username: '',
     password: '',
     confirmPwd: '',
-    phoneNumber: '',
-    imageCode: '',
-    smsCode: ''
 })
 /* rules */
 const validatePass = (rule, value, callback) => {
@@ -44,16 +40,6 @@ const rules = reactive({
         { min: 1, max: 20, message: '注册ID应>1,<20', trigger: ['blur', 'change'] },
         { pattern: /^\w+$/, message: '由数字、26个英文字母或者下划线组成的注册ID', trigger: ['blur', 'change'] }
     ],
-    phoneNumber: [
-        { required: true, message: '请输入手机号', trigger: 'blur' },
-        { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号', trigger: ['blur', 'change'] }
-    ],
-    imageCode: [
-        { required: true, message: '请输入图片验证码', trigger: ['blur', 'change'] },
-    ],
-    smsCode: [
-        { required: true, message: '请输入短信验证码', trigger: ['blur', 'change'] },
-    ],
     password: [
         { validator: validatePass, trigger: ['blur'] },
     ],
@@ -62,71 +48,8 @@ const rules = reactive({
     ]
 })
 
-/* 图片验证码相关 */
-const imageCodeInfo = reactive({
-    imgUrl: '',
-    imageId: '',
-    imageCode: ''
-})
 
-const changeImageCode = () => {
-    sendImageCode()
-}
-//获取图片验证码
-const sendImageCode = async () => {
-    try {
-        const { data } = await createImageCode()
-        if (data.image_enabled === 'true') {
-            imageCodeInfo.imgUrl = `${window.location.protocol}//a1.easemob.com/inside/app/image/${data.image_id}`
-            imageCodeInfo.imageId = data.image_id
-        }
 
-    } catch (error) {
-        ElMessage.error('图片验证码获取失败请稍后重试！')
-    }
-
-}
-onMounted(() => {
-    sendImageCode()
-})
-
-/* 短信验证码相关 */
-const isSenedAuthCode = ref(false)
-const authCodeNextCansendTime = ref(60)
-const sendMessageAuthCode = async () => {
-    const params = {
-        phoneNumber: resetPasswordFrom.phoneNumber,
-        imageId: imageCodeInfo.imageId,
-        imageCode: resetPasswordFrom.imageCode
-    }
-    try {
-        await fetchAuthCode({ ...params })
-        ElMessage.success('验证码已发送,请注意查收！')
-        startCountDown()
-    } catch (error) {
-        if (error.response.data) {
-            const { code, errorInfo } = error.response.data
-            handleSDKErrorNotifi(code, errorInfo)
-        }
-    }
-
-}
-const startCountDown = () => {
-    isSenedAuthCode.value = true
-    let timer = null
-    timer = setInterval(() => {
-        if (authCodeNextCansendTime.value <= 60 && authCodeNextCansendTime.value > 0) {
-            authCodeNextCansendTime.value--
-        }
-        else {
-            clearInterval(timer)
-            timer = null
-            authCodeNextCansendTime.value = 60
-            isSenedAuthCode.value = false
-        }
-    }, 1000)
-
-}
 /* 重置密码第一步 */
 const resetPwdTheNext = (formEl) => {
     if (!formEl) return
@@ -134,13 +57,12 @@ const resetPwdTheNext = (formEl) => {
         if (valid) {
             const params = {
                 userId: resetPasswordFrom.username,
-                phoneNumber: resetPasswordFrom.phoneNumber,
-                smsCode: resetPasswordFrom.smsCode
             }
             try {
                 const { code } = await requestModifyPwd({ ...params })
                 if (code === 200) nextStep.value = 2
             } catch (error) {
+                console.log('err>>>', err);
                 if (error.response.data) {
                     const { code, errorInfo } = error.response.data
                     handleSDKErrorNotifi(code, errorInfo)
@@ -185,31 +107,6 @@ const submitNewPassword = (formEl) => {
             <el-form-item prop="username">
                 <el-input class="login_input_style" v-model="resetPasswordFrom.username" placeholder="请输入用户ID"
                     clearable />
-            </el-form-item>
-            <el-form-item prop="phoneNumber">
-                <el-input class="login_input_style" v-model="resetPasswordFrom.phoneNumber" placeholder="请输入手机号"
-                    clearable>
-                    <template #prepend>+86</template>
-                </el-input>
-            </el-form-item>
-            <el-form-item prop="imageCode">
-                <el-input class="login_input_style" v-model="resetPasswordFrom.imageCode" placeholder="请输入右侧图片验证码">
-                    <template #append>
-                        <el-image class="auth_code" :src="imageCodeInfo.imgUrl" @click="changeImageCode">
-                            <template #placeholder>
-                                <span>加载中...</span>
-                            </template>
-                        </el-image>
-                    </template>
-                </el-input>
-            </el-form-item>
-            <el-form-item prop="smsCode">
-                <el-input class="login_input_style" v-model="resetPasswordFrom.smsCode" placeholder="请输入短信验证码">
-                    <template #append>
-                        <el-button type="primary" :disabled="isSenedAuthCode" @click="sendMessageAuthCode"
-                            v-text="isSenedAuthCode ? `${authCodeNextCansendTime}s后重新获取` : '获取验证码'"></el-button>
-                    </template>
-                </el-input>
             </el-form-item>
             <el-form-item>
                 <div class="function_button_box">

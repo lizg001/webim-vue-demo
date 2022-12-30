@@ -3,139 +3,66 @@ import { ref, reactive, watch, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import { EaseChatClient } from '@/IM/initwebsdk'
 import { handleSDKErrorNotifi } from '@/utils/handleSomeData'
-import { fetchUserLoginSmsCode, fetchUserLoginToken } from '@/api/login'
 import { useStore } from 'vuex'
 import { usePlayRing } from '@/hooks'
 const store = useStore()
 const loginValue = reactive({
-    phoneNumber: '',
-    smsCode: ''
+  username: '',
+  password: ''
 })
 const buttonLoading = ref(false)
 //根据登陆初始化一部分状态
 const loginState = computed(() => store.state.loginState)
 watch(loginState, (newVal) => {
-    if (newVal) {
-        buttonLoading.value = false
-        loginValue.phoneNumber = ''
-        loginValue.smsCode = ''
-    }
+  if (newVal) {
+    buttonLoading.value = false
+  }
 })
 const rules = reactive({
-    phoneNumber: [
-        { required: true, message: '请输入手机号', trigger: 'blur' },
-        { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号', trigger: ['blur', 'change'] }
-    ],
-    smsCode: [
-        { required: true, message: '请输入短信验证码', trigger: ['blur', 'change'] },
-    ]
+  username: [
+    { required: true, message: '请输入登录ID', trigger: 'blur' },
+    { min: 1, max: 20, message: '登陆ID>1,<20', trigger: 'blur' },
+  ],
+  password: [
+    { required: true, message: '请输入登录密码', trigger: 'blur' },
+  ]
 })
 //登陆接口调用
 const loginIM = async () => {
-    const { clickRing } = usePlayRing()
-    clickRing()
-    buttonLoading.value = true
-    /* SDK 登陆的方式 */
-    // try {
-    //   let { accessToken } = await EaseChatClient.open({
-    //     user: loginValue.username.toLowerCase(),
-    //     pwd: loginValue.password.toLowerCase(),
-    //   });
-    //   window.localStorage.setItem(`EASEIM_loginUser`, JSON.stringify({ user: loginValue.username, accessToken: accessToken }))
-    // } catch (error) {
-    //   console.log('>>>>登陆失败', error);
-    //   const { data: { extraInfo } } = error
-    //   handleSDKErrorNotifi(error.type, extraInfo.errDesc);
-    //   loginValue.username = '';
-    //   loginValue.username = '';
-    // }
-    // finally {
-    //   buttonLoading.value = false;
-    // }
-    /* 环信后台接口登陆（仅供环信线上demo使用！） */
-    const params = {
-        phoneNumber: loginValue.phoneNumber.toString(),
-        smsCode: loginValue.smsCode.toString(),
-    }
-    try {
-        const res = await fetchUserLoginToken(params)
-        if (res?.code === 200) {
-            console.log('>>>>>>登陆token获取成功', res.token)
-            EaseChatClient.open({
-                user: loginValue.phoneNumber,
-                accessToken: res.token
-            })
-            window.localStorage.setItem('EASEIM_loginUser', JSON.stringify({ user: loginValue.phoneNumber, accessToken: res.token }))
-        }
-
-    } catch (error) {
-        console.log('>>>>登陆失败', error)
-        if (error.response?.data) {
-            const { code, errorInfo } = error.response.data
-            if (errorInfo.includes('does not exist.')) {
-                ElMessage({
-                    center: true,
-                    message: `用户${loginValue.username}不存在！`,
-                    type: 'error',
-                })
-            } else {
-                handleSDKErrorNotifi(code, errorInfo)
-            }
-        }
-    }
-    finally {
-        buttonLoading.value = false
-    }
-
-}
-/* 短信验证码相关 */
-const isSenedAuthCode = ref(false)
-const authCodeNextCansendTime = ref(60)
-const sendMessageAuthCode = async () => {
-    const phoneNumber = loginValue.phoneNumber
-    try {
-        await fetchUserLoginSmsCode(phoneNumber)
-        ElMessage({ type: 'success', message: '验证码获取成功！', center: true })
-        startCountDown()
-    } catch (error) {
-        ElMessage({ type: 'error', message: '验证码获取失败！', center: true })
-    }
-
-}
-const startCountDown = () => {
-    isSenedAuthCode.value = true
-    let timer = null
-    timer = setInterval(() => {
-        if (authCodeNextCansendTime.value <= 60 && authCodeNextCansendTime.value > 0) {
-            authCodeNextCansendTime.value--
-        }
-        else {
-            clearInterval(timer)
-            timer = null
-            authCodeNextCansendTime.value = 60
-            isSenedAuthCode.value = false
-        }
-    }, 1000)
-
+  const { clickRing } = usePlayRing()
+  clickRing()
+  buttonLoading.value = true
+  /* SDK 登陆的方式 */
+  try {
+    let { accessToken } = await EaseChatClient.open({
+      user: loginValue.username.toLowerCase(),
+      pwd: loginValue.password.toLowerCase(),
+    });
+    window.localStorage.setItem(`EASEIM_loginUser`, JSON.stringify({ user: loginValue.username, accessToken: accessToken }))
+  } catch (error) {
+    console.log('>>>>登陆失败', error);
+    const { data: { extraInfo } } = error
+    handleSDKErrorNotifi(error.type, extraInfo.errDesc);
+    loginValue.username = '';
+    loginValue.username = '';
+  }
+  finally {
+    buttonLoading.value = false;
+  }
 }
 </script>
 
 <template>
   <el-form :model="loginValue" :rules="rules">
-    <el-form-item prop="phoneNumber">
-      <el-input class="login_input_style" v-model="loginValue.phoneNumber" placeholder="手机号" clearable />
+    <el-form-item prop="username">
+      <el-input class="login_input_style" v-model="loginValue.username" placeholder="用户名" clearable />
     </el-form-item>
-    <el-form-item prop="smsCode">
-      <el-input class="login_input_style" v-model="loginValue.smsCode" placeholder="请输入短信验证码">
-        <template #append>
-          <el-button type="primary" :disabled="loginValue.phoneNumber && isSenedAuthCode" @click="sendMessageAuthCode"
-            v-text="isSenedAuthCode ? `${authCodeNextCansendTime}S` : '获取验证码'"></el-button>
-        </template>
-      </el-input>
+    <el-form-item prop="password">
+      <el-input class="login_input_style" v-model="loginValue.password" placeholder="密码" show-password />
     </el-form-item>
     <el-form-item>
       <div class="function_button_box">
-        <el-button v-if="(loginValue.phoneNumber && loginValue.smsCode)" class="haveValueBtn" :loading="buttonLoading"
+        <el-button v-if="loginValue.username && loginValue.password" class="haveValueBtn" :loading="buttonLoding"
           @click="loginIM">登录</el-button>
         <el-button v-else class="notValueBtn">登录</el-button>
       </div>

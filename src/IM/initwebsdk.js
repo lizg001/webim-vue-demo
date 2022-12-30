@@ -5,9 +5,9 @@ const webimConfig = window.localStorage.getItem('webimConfig')
 const CUSTOM_CONFIG = (webimConfig && JSON.parse(webimConfig)) || {}
 console.log('>>>>>>webimConfig', CUSTOM_CONFIG)
 //环信appKey默认配置项
-const DEFAULT_APPKEY = 'easemob#easeim'
-const DEFAULT_URL = '//im-api-v2.easemob.com/ws'
-const DEFAULT_APIURL = '//a1.easemob.com'
+const DEFAULT_APPKEY = 'easemob-demo#zim'
+const DEFAULT_URL = '//221.204.13.2:12003/ws'
+const DEFAULT_APIURL = '//221.204.13.2:12000'
 //存放实例化后所有的方法
 // let EaseIMClient = {};
 // window.EaseIM = EaseIM = Easemob_SDK;
@@ -19,7 +19,7 @@ const DEFAULT_APIURL = '//a1.easemob.com'
  **/
 const EaseChatClient = new EaseChatSDK.connection({
     appKey: CUSTOM_CONFIG.appKey ? CUSTOM_CONFIG.appKey : DEFAULT_APPKEY,
-    isHttpDNS: !CUSTOM_CONFIG.isPrivate, //取反isPrivate
+    isHttpDNS: false,
     url: CUSTOM_CONFIG.imServer ? CUSTOM_CONFIG.imServer : DEFAULT_URL,
     apiUrl: CUSTOM_CONFIG.restServer
         ? `${CUSTOM_CONFIG.restServer}:${CUSTOM_CONFIG.port}`
