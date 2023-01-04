@@ -11,7 +11,7 @@ webim-vue demo是基于环信sdk开发的一款具有单聊、群聊、聊天室
 npm install
 
 # serve with hot reload at localhost:8080
-npm start || HTTPS=true npm start
+HTTPS=true npm start
 
 # build for production with minification
 npm run build

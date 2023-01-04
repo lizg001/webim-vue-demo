@@ -57,21 +57,8 @@ WebIM.conn = new WebIM.connection({
 
 	// 公有云 isHttpDNS 默认配置为true
 	isHttpDNS: WebIM.config.isHttpDNS,
-	// url: WebIM.config.url,
-	// apiUrl: WebIM.config.apiUrl,
-
-	// 私有云设置，详细文档：http://docs-im.easemob.com/im/web/other/privatedeploy
-	// isHttpDNS: false,
-	// url: 'https://im-api-v2.easecdn.com/ws', // 设置为私有云的websocket server url
-	// apiUrl: 'https://a1.easecdn.com', // 设置为私有云的rest server url
-
-	// url: 'http://msync-api-a1-test.easemob.com:8081/ws', // 设置为私有云的websocket server url
-	// url: window.location.protocol + '//msync-api-a1-test.easemob.com/ws', // 设置为私有云的websocket server url
-
-	// url: 'https://im-api-v2-hsb.easemob.com/ws', // 设置为私有云的websocket server url
-	// url: 'http://52.80.99.104:8081/ws', // 设置为私有云的websocket server url
-	// apiUrl: 'http://a1-test.easemob.com:8089', // 设置为私有云的rest server url
-	// apiUrl: window.location.protocol + '//a1-test.easemob.com', // 设置为私有云的rest server url
+	url: WebIM.config.socketServer,
+	apiUrl: WebIM.config.restServer,
 });
 
 // 通话状态

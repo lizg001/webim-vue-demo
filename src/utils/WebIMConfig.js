@@ -17,14 +17,7 @@ var config = {
 	/*
      * Application AppKey
      */
-	// appkey:"gdpwq123#ceshi",
-	// appkey: '5101220107132865#test',
-	// appkey: 'easemob-demo#chatdemoui',
-	appkey: 'easemob-demo#easeim',
-	// appkey: 'easemobpush#push1',
-	// appkey: '81446724#514456',
-	// appkey: '41117440#383391',
-	// appkey: 'easemob-demo#eastmd1',
+	appkey: 'easemob-demo#zim',
 	/*
      * Application Host
      */
@@ -40,7 +33,16 @@ var config = {
     * 公有云配置默认为 true，
     * 私有云配置请设置 isHttpDNS = false , 详细文档：http://docs-im.easemob.com/im/web/other/privatedeploy
     */
-	isHttpDNS: true,
+	isHttpDNS: false,
+
+     /*
+     * websocket server
+     */
+    socketServer: 'https://221.204.13.2:13003/ws',
+    /*
+     * Backend REST API URL
+     */
+    restServer: 'https://221.204.13.2:13000',
 	/*
     
     /*
