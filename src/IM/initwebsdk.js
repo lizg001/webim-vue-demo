@@ -6,8 +6,8 @@ const CUSTOM_CONFIG = (webimConfig && JSON.parse(webimConfig)) || {}
 console.log('>>>>>>webimConfig', CUSTOM_CONFIG)
 //环信appKey默认配置项
 const DEFAULT_APPKEY = 'easemob-demo#zim'
-const DEFAULT_URL = '//221.204.13.2:12003/ws'
-const DEFAULT_APIURL = '//221.204.13.2:12000'
+const DEFAULT_URL = '//221.204.13.2:13003/ws'
+const DEFAULT_APIURL = '//221.204.13.2:13000'
 //存放实例化后所有的方法
 // let EaseIMClient = {};
 // window.EaseIM = EaseIM = Easemob_SDK;
